@@ -19,6 +19,10 @@ Web application written in Python uses a password you provide over *https* conne
 * Only sha-256 salted hash is stored on your server
 * The data itself is encrypted using AES-256 encryption, so getting an access to the file from S3 would also not pose a huge security risk  
 
+####Demo
+Here you can see a demo of the UI (data is stored in your browser session) [Demo](http://leonti.github.io/vault/demo)  
+Any password will do :)  
+
 ####How to install  
 
 Build docker image:  
