@@ -1,0 +1,5 @@
+Flask
+flask-httpauth
+SimpleAES
+simples3
+bcrypt

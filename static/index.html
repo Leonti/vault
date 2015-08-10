@@ -1,0 +1,117 @@
+<html lang="en" ng-app="VaultApp">
+  <head>
+    <link rel="stylesheet" href="/css/libs/angular-material.min.css">
+    <link rel="stylesheet" href="/css/libs/robofont.css">
+    <link rel="stylesheet" href="/css/libs/treasure-overlay-spinner.min.css">
+
+    <meta name="viewport" content="initial-scale=1" />
+  </head>
+  <body ng-controller="AppCtrl">
+
+
+    <div layout="row" layout-align="center center" style="height: 100%;" ng-if="!vaultData">
+        <div flex="30">
+            <div layout="row" layout-align="center center">
+                <md-input-container flex>
+                  <label>Master password</label>
+                  <input type="password" ng-model="masterPassword" ng-keyup="$event.keyCode == 13 ? openVault(masterPassword) : null">
+                </md-input-container>
+            </div>
+        </div>
+    </div>
+
+    <treasure-overlay-spinner active="loading">
+        <div layout="column" ng-if="vaultData">
+          <md-content class="md-padding">
+            <md-tabs md-dynamic-height md-border-bottom md-selected="selectedTabIndex">
+              <md-tab label="Passwords">
+                <md-content class="md-padding">
+                    <div layout="row" layout-align="start center">
+                        <md-input-container flex>
+                          <label>Search credentials</label>
+                          <input ng-model="credentialSearch" ng-change="updateCredentialSearch(credentialSearch)">
+                        </md-input-container>
+                    </div>
+                    <md-card ng-repeat="credential in vaultData.credentials" ng-show="credentialInSearch(credential)">
+                        <md-card-content>
+                            <div layout="row">
+                                <div flex>
+                                    <h4>{{credential.id}}</h4>
+                                    <div layout="row">
+                                        <div flex="50">
+                                            {{credential.username}}
+                                        </div>
+                                        <div flex="50">
+                                            {{credential.password}}
+                                        </div>
+                                    </div>                                                                
+                                </div>
+                                <div flex="20" layout="row" layout-align="end center">
+                                    <md-button class="md-icon-button" aria-label="Edit" ng-click="onEditCredential($event, $index)">
+                                        <ng-md-icon icon="edit" style="fill: rgba(0, 0, 0, 0.54);" size="24"></ng-md-icon>
+                                    </md-button>
+                                    <md-button class="md-icon-button" aria-label="Delete" ng-click="onDeleteCredential($event, $index)">
+                                        <ng-md-icon icon="delete" style="fill: rgba(0, 0, 0, 0.54);" size="24"></ng-md-icon>
+                                    </md-button>
+                                </div>
+                            </div>
+                        </md-card-content>
+                    </md-card>
+                </md-content>
+              </md-tab>
+              <md-tab label="Notes">
+                <md-content class="md-padding">
+                    <div layout="row" layout-align="start center">
+                        <md-input-container flex>
+                          <label>Search notes</label>
+                          <input ng-model="noteSearch" ng-change="updateNoteSearch(noteSearch)">
+                        </md-input-container>
+                    </div>
+                    <md-card ng-repeat="note in vaultData.notes" ng-show="noteInSearch(note)">
+                        <md-card-content>
+                            <div layout="row">
+                                <div flex>
+                                    <h4>{{note.title}}</h4>
+                                    <div layout="row">
+                                        {{note.content}}
+                                    </div>                                                                
+                                </div>
+                                <div flex="20" layout="row" layout-align="end center">
+                                    <md-button class="md-icon-button" aria-label="Edit" ng-click="onEditNote($event, $index)">
+                                        <ng-md-icon icon="edit" style="fill: rgba(0, 0, 0, 0.54);" size="24"></ng-md-icon>
+                                    </md-button>
+                                    <md-button class="md-icon-button" aria-label="Delete" ng-click="onDeleteNote($event, $index)">
+                                        <ng-md-icon icon="delete" style="fill: rgba(0, 0, 0, 0.54);" size="24"></ng-md-icon>
+                                    </md-button>
+                                </div>
+                            </div>
+                        </md-card-content>
+                    </md-card>
+                </md-content>
+              </md-tab>
+            </md-tabs>
+            <md-button class="md-fab" aria-label="Add stuff" ng-disabled="loading" ng-click="onAdd(selectedTabIndex)" style="position: fixed; right: 23px; bottom: 23px;">
+                <ng-md-icon icon="add" style="fill: white;" size="24"></ng-md-icon>
+            </md-button>
+          </md-content>
+        </div>
+    </treasure-overlay-spinner>
+
+    <!-- Angular Material Dependencies -->
+    <script src="/js/libs/angular.min.js"></script>
+    <script src="/js/libs/angular-animate.min.js"></script>
+    <script src="/js/libs/angular-aria.min.js"></script>
+
+    <!-- Angular Material -->
+    <script src="/js/libs/angular-material.min.js"></script>
+    <script src="/js/libs/angular-material-icons.min.js"></script>
+    
+    <script src="/js/libs/treasure-overlay-spinner.min.js"></script>
+    <script src="/js/libs/angular-utf8-base64.min.js"></script>
+
+    <script src="/js/app.js"></script>
+    <script src="/js/vault-storage.js"></script>
+  </body>
+</html>
+
+
