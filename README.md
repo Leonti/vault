@@ -33,7 +33,7 @@ Generate configuration file:
 You will have to provide your S3 config and your master password.  
 
 Run the whole thing:  
-`sudo docker run -v /data:/data -e SETTINGS=/data/settings.cfg --name vault -t -i leonti/vault python vault.py`  
+`sudo docker run -v /data:/data -e SETTINGS=/data/settings.cfg --name vault leonti/vault python vault.py`  
 
 After that you have to run a docker nginx instance with domain and ssl configuration, and link `vault` container to it.  
 
