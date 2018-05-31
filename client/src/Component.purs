@@ -24,7 +24,7 @@ type State =
   , error :: Maybe String
   , vault :: Maybe Vault
   }
-
+-- json-server --watch example.json 
 data VaultView = Credentials | Notes
 
 data Query a
