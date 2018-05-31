@@ -1,0 +1,15 @@
+{
+  "name": "client",
+  "set": "27.05.2018",
+  "source": "https://github.com/Leonti/package-sets.git",
+  "depends": [
+    "psci-support",
+    "console",
+    "eff",
+    "prelude",
+    "halogen",
+    "affjax",
+    "argonaut",
+    "b64"
+  ]
+}

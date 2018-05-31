@@ -1,0 +1,5 @@
+{
+  "db": [
+    {"id": 1, "credentials": [{"id": "id", "password": "password", "username": "username"}], "notes": [{"title": "title", "content": "content"}]}
+  ]
+}
