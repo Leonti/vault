@@ -1,8 +1,11 @@
 {
   "name": "client",
-  "set": "27.05.2018",
+  "set": "30.06.2018",
   "source": "https://github.com/Leonti/package-sets.git",
   "depends": [
+    "strings",
+    "clipboard",
+    "random",
     "psci-support",
     "console",
     "eff",

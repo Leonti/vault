@@ -1,7 +1,8 @@
-module Vault (Vault(..), Credential(..), Note(..)) where
+module Vault (Vault(..), Credential(..), Note(..), VaultEntry(..)) where
 
 import Prelude
-import Data.Argonaut (class DecodeJson, decodeJson, (.?))
+import Data.Newtype (class Newtype)
+import Data.Argonaut (class DecodeJson, decodeJson, class EncodeJson, jsonEmptyObject, (~>), (:=), (.?))
 
 newtype Credential = Credential
   { id :: String
@@ -17,6 +18,11 @@ newtype Vault = Vault
   { credentials :: Array Credential
   , notes :: Array Note
   }
+
+data VaultEntry = CredentialEntry Credential | NoteEntry Note
+
+derive instance newtypeCredential :: Newtype Credential _
+derive instance newtypeNote :: Newtype Note _
 
 instance decodeJsonCredential :: DecodeJson Credential where
   decodeJson json = do
@@ -39,3 +45,22 @@ instance decodeJsonVault :: DecodeJson Vault where
     credentials <- obj .? "credentials"
     notes <- obj .? "notes"
     pure $ Vault { credentials: credentials, notes: notes }
+
+instance encodeJsonCredential :: EncodeJson Credential where
+  encodeJson (Credential credential)
+     = "id" := credential.id
+    ~> "username" := credential.username
+    ~> "password" := credential.password
+    ~> jsonEmptyObject
+
+instance encodeJsonNote :: EncodeJson Note where
+  encodeJson (Note note)
+     = "title" := note.title
+    ~> "content" := note.content
+    ~> jsonEmptyObject
+
+instance encodeJsonVault :: EncodeJson Vault where
+  encodeJson (Vault vault)
+     = "credentials" := vault.credentials
+    ~> "notes" := vault.notes
+    ~> jsonEmptyObject

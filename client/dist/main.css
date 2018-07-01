@@ -1,0 +1,9 @@
+.note-content {
+  white-space: pre;
+}
+
+i.generate-password.material-icons.mdc-text-field__icon,
+i.edit-icon.material-icons.mdc-text-field__icon {
+  pointer-events: inherit;
+  cursor: pointer;
+}
