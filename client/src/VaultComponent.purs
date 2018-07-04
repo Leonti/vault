@@ -12,7 +12,7 @@ import DOM.HTML.Indexed.InputType (InputType(..))
 import DOM.Node.Element (getAttribute)
 import DOM.Node.Types (Element)
 import Data.Array (filter, length, range, zip, updateAt, deleteAt)
-import Data.Maybe (Maybe(..), fromMaybe, maybe)
+import Data.Maybe (Maybe(..), fromMaybe, isJust, maybe)
 import Data.Newtype (over)
 import Data.String (contains, Pattern(..))
 import Data.Tuple (Tuple(..))
@@ -36,6 +36,7 @@ type State =
   , vaultView :: VaultView
   , maybeOpenedEntry :: Maybe OpenedEntry
   , maybeFilter :: Maybe String
+  , maybeDelete :: Maybe Int
   }
 -- json-server --watch example.json
 
@@ -53,9 +54,11 @@ data Query a
   | SaveEntry a
   | CancelEdit a
   | EditCredential Credential Int a
-  | DeleteCredential Int a
   | EditNote Note Int a
-  | DeleteNote Int a
+  | ConfirmedNoteDelete Int a
+  | Delete Int a
+  | ConfirmedCredentialDelete Int a
+  | CancelDelete a
 
 renderCredential :: forall eff. (Tuple Int Credential) -> H.ParentHTML Query EditEntryComponent.Query ChildSlot eff
 renderCredential (Tuple i (Credential credential)) =
@@ -74,8 +77,24 @@ renderCredential (Tuple i (Credential credential)) =
         ] [HH.text "edit"]
       , HH.i
         [ HP.class_ (HH.ClassName "material-icons mdc-text-field__icon edit-icon")
-        , HE.onClick (HE.input_ (DeleteCredential i))
+        , HE.onClick (HE.input_ (Delete i))
         ] [HH.text "delete"]
+      ]
+    ]
+
+renderDeleteCredentialConfirmation ::  forall eff. (Tuple Int Credential) -> VaultComponentHTML eff
+renderDeleteCredentialConfirmation (Tuple i (Credential credential)) =
+  HH.div [ HP.class_ (HH.ClassName "mdc-card") ]
+    [ HH.div_ [ HH.text $ "Are you sure you want to delete credential: " <> credential.id ]
+    , HH.div []
+      [ HH.button
+          [ HP.class_ (HH.ClassName "mdc-button mdc-button--outlined")
+          , HE.onClick (HE.input_ (ConfirmedCredentialDelete i)) ]
+          [ HH.text "Delete" ]
+      , HH.button
+          [ HP.class_ (HH.ClassName "mdc-button")
+          , HE.onClick (HE.input_ CancelDelete) ]
+          [ HH.text "Cancel" ]
       ]
     ]
 
@@ -103,8 +122,24 @@ renderNote (Tuple i (Note note)) =
         ] [HH.text "edit"]
       , HH.i
         [ HP.class_ (HH.ClassName "material-icons mdc-text-field__icon edit-icon")
-        , HE.onClick (HE.input_ (DeleteNote i))
+        , HE.onClick (HE.input_ (Delete i))
         ] [HH.text "delete"]
+      ]
+    ]
+
+renderDeleteNoteConfirmation ::  forall eff. (Tuple Int Note) -> VaultComponentHTML eff
+renderDeleteNoteConfirmation (Tuple i (Note note)) =
+  HH.div [ HP.class_ (HH.ClassName "mdc-card") ]
+    [ HH.div_ [ HH.text $ "Are you sure you want to delete note: " <> note.title ]
+    , HH.div []
+      [ HH.button
+          [ HP.class_ (HH.ClassName "mdc-button mdc-button--outlined")
+          , HE.onClick (HE.input_ (ConfirmedNoteDelete i)) ]
+          [ HH.text "Delete" ]
+      , HH.button
+          [ HP.class_ (HH.ClassName "mdc-button")
+          , HE.onClick (HE.input_ CancelDelete) ]
+          [ HH.text "Cancel" ]
       ]
     ]
 
@@ -148,26 +183,51 @@ renderVault st =
         Just _ -> HH.div_ []
     , case st.maybeOpenedEntry of
         Nothing -> HH.div_ []
-        Just openedEntry -> HH.slot EditEntrySlot (EditEntryComponent.ui openedEntry.entry ) openedEntry.entry absurd
+        Just openedEntry ->
+          if isJust openedEntry.position
+            then HH.div_ []
+            else HH.slot EditEntrySlot (EditEntryComponent.ui openedEntry.entry ) openedEntry.entry absurd
     , case st.maybeOpenedEntry of
-        Just _ -> HH.div_
-                    [ HH.button
-                        [ HP.class_ (HH.ClassName "mdc-button mdc-button--outlined")
-                        , HE.onClick (HE.input_ SaveEntry) ]
-                        [ HH.text "Save" ]
-                    , HH.button
-                      [ HP.class_ (HH.ClassName "mdc-button")
-                      , HE.onClick (HE.input_ CancelEdit) ]
-                      [ HH.text "Cancel" ]
-                    ]
+        Just openedEntry -> case openedEntry.position of
+          Just _ -> HH.div_ []
+          Nothing -> renderEditActions
         Nothing -> HH.div_ []
-    , renderVaultList st.vault st.vaultView st.maybeFilter
+    , renderVaultList st.vault st.vaultView st.maybeFilter st.maybeDelete st.maybeOpenedEntry
     ]
 
+renderEditActions :: forall eff. VaultComponentHTML eff
+renderEditActions = HH.div_
+    [ HH.button
+        [ HP.class_ (HH.ClassName "mdc-button mdc-button--outlined")
+        , HE.onClick (HE.input_ SaveEntry) ]
+        [ HH.text "Save" ]
+    , HH.button
+      [ HP.class_ (HH.ClassName "mdc-button")
+      , HE.onClick (HE.input_ CancelEdit) ]
+      [ HH.text "Cancel" ]
+    ]
 
-renderVaultList :: forall eff. Vault -> VaultView -> Maybe String -> H.ParentHTML Query EditEntryComponent.Query ChildSlot eff
-renderVaultList (Vault vault) Credentials maybeFilter = renderEntries renderCredential (maybe (const true) credentialFilter maybeFilter) vault.credentials
-renderVaultList (Vault vault) Notes maybeFilter = renderEntries renderNote (maybe (const true) noteFilter maybeFilter) vault.notes
+renderVaultList :: forall eff. Vault -> VaultView -> Maybe String -> Maybe Int -> Maybe OpenedEntry -> VaultComponentHTML (Aff (random :: RANDOM | eff))
+renderVaultList (Vault vault) Credentials maybeFilter maybeDelete maybeOpenedEntry = renderEntries renderEntity (maybe (const true) credentialFilter maybeFilter) vault.credentials
+  where
+    renderEntity e@(Tuple i _) = case maybeDelete of
+      Just position -> if position == i then renderDeleteCredentialConfirmation e else renderCredential e
+      Nothing -> case maybeOpenedEntry of
+        Just openedEntry -> case openedEntry.position of
+          Just p -> if p == i then
+              HH.div_
+                [HH.slot EditEntrySlot (EditEntryComponent.ui openedEntry.entry ) openedEntry.entry absurd
+                , renderEditActions
+                ]
+            else
+              renderCredential e
+          Nothing -> renderCredential e
+        Nothing -> renderCredential e
+renderVaultList (Vault vault) Notes maybeFilter maybeDelete maybeOpenedEntry = renderEntries renderEntity (maybe (const true) noteFilter maybeFilter) vault.notes
+  where
+    renderEntity e@(Tuple i _) = case maybeDelete of
+      Just position -> if position == i then renderDeleteNoteConfirmation e else renderNote e
+      Nothing -> renderNote e
 
 tabClass :: VaultView -> VaultView -> String
 tabClass tab currentView = "mdc-tab" <> (if tab == currentView then " mdc-tab--active" else "")
@@ -198,6 +258,7 @@ initialState vault =
   , vaultView: Credentials
   , maybeOpenedEntry: Nothing
   , maybeFilter: Nothing
+  , maybeDelete: Nothing
   }
 
 setPassword :: String -> Credential -> Credential
@@ -218,7 +279,7 @@ eval query = case query of
     H.modify (_ { maybeFilter = if filter /= "" then Just filter else Nothing })
     pure next
   SwitchTab vaultView next -> do
-    H.modify (_ { vaultView = vaultView, maybeOpenedEntry = Nothing })
+    H.modify (_ { vaultView = vaultView, maybeOpenedEntry = Nothing, maybeDelete = Nothing })
     pure next
   AddEntry next -> do
     vaultView <- H.gets _.vaultView
@@ -262,20 +323,31 @@ eval query = case query of
       , position: Just position
       } })
     pure next
-  DeleteCredential position next -> do
-    st <- H.get
-    let (Vault vault) = st.vault
-    let updatedVault = Vault $ vault { credentials = fromMaybe vault.credentials $ deleteAt position vault.credentials }
-    H.modify (_ { vault = updatedVault })
-    H.raise $ Updated updatedVault
-    pure next
   EditNote note position next -> do
     H.modify (_ { maybeOpenedEntry = Just
       { entry: NoteEntry note
       , position: Just position
       } })
     pure next
-  DeleteNote position next -> do
+  Delete position next -> do
+    H.modify (_ { maybeDelete = Just position })
+    pure next
+  ConfirmedCredentialDelete position next -> do
+    st <- H.get
+    let (Vault vault) = st.vault
+    let updatedVault = Vault $ vault { credentials = fromMaybe vault.credentials $ deleteAt position vault.credentials }
+    H.modify (_ { vault = updatedVault, maybeDelete = Nothing })
+    H.raise $ Updated updatedVault
+    pure next
+  ConfirmedNoteDelete position next -> do
+    st <- H.get
+    let (Vault vault) = st.vault
+    let updatedVault = Vault $ vault { notes = fromMaybe vault.notes $ deleteAt position vault.notes }
+    H.modify (_ { vault = updatedVault, maybeDelete = Nothing })
+    H.raise $ Updated updatedVault
+    pure next
+  CancelDelete next -> do
+    H.modify (_ { maybeDelete = Nothing })
     pure next
 
 ui :: forall eff. Vault -> H.Component HH.HTML Query Unit Message (Aff (random :: RANDOM, dom :: DOM | eff))

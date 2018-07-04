@@ -64152,18 +64152,6 @@ var EditCredential = (function () {
     };
     return EditCredential;
 })();
-var DeleteCredential = (function () {
-    function DeleteCredential(value0, value1) {
-        this.value0 = value0;
-        this.value1 = value1;
-    };
-    DeleteCredential.create = function (value0) {
-        return function (value1) {
-            return new DeleteCredential(value0, value1);
-        };
-    };
-    return DeleteCredential;
-})();
 var EditNote = (function () {
     function EditNote(value0, value1, value2) {
         this.value0 = value0;
@@ -64179,17 +64167,50 @@ var EditNote = (function () {
     };
     return EditNote;
 })();
-var DeleteNote = (function () {
-    function DeleteNote(value0, value1) {
+var ConfirmedNoteDelete = (function () {
+    function ConfirmedNoteDelete(value0, value1) {
         this.value0 = value0;
         this.value1 = value1;
     };
-    DeleteNote.create = function (value0) {
+    ConfirmedNoteDelete.create = function (value0) {
         return function (value1) {
-            return new DeleteNote(value0, value1);
+            return new ConfirmedNoteDelete(value0, value1);
         };
     };
-    return DeleteNote;
+    return ConfirmedNoteDelete;
+})();
+var Delete = (function () {
+    function Delete(value0, value1) {
+        this.value0 = value0;
+        this.value1 = value1;
+    };
+    Delete.create = function (value0) {
+        return function (value1) {
+            return new Delete(value0, value1);
+        };
+    };
+    return Delete;
+})();
+var ConfirmedCredentialDelete = (function () {
+    function ConfirmedCredentialDelete(value0, value1) {
+        this.value0 = value0;
+        this.value1 = value1;
+    };
+    ConfirmedCredentialDelete.create = function (value0) {
+        return function (value1) {
+            return new ConfirmedCredentialDelete(value0, value1);
+        };
+    };
+    return ConfirmedCredentialDelete;
+})();
+var CancelDelete = (function () {
+    function CancelDelete(value0) {
+        this.value0 = value0;
+    };
+    CancelDelete.create = function (value0) {
+        return new CancelDelete(value0);
+    };
+    return CancelDelete;
 })();
 
 // json-server --watch example.json
@@ -64219,18 +64240,18 @@ var testSelector = function (sel) {
 };
 var setPassword = function (password) {
     return Data_Newtype.over(Vault.newtypeCredential)(Vault.newtypeCredential)(Vault.Credential)(function (v) {
-        var $39 = {};
-        for (var $40 in v) {
-            if ({}.hasOwnProperty.call(v, $40)) {
-                $39[$40] = v[$40];
+        var $48 = {};
+        for (var $49 in v) {
+            if ({}.hasOwnProperty.call(v, $49)) {
+                $48[$49] = v[$49];
             };
         };
-        $39.password = password;
-        return $39;
+        $48.password = password;
+        return $48;
     });
 };
 var renderNote = function (v) {
-    return Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("mdc-card") ])([ Halogen_HTML_Elements.div_([ Halogen_HTML_Core.text(v.value1.title) ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("note-content") ])([ Halogen_HTML_Core.text(v.value1.content) ]), Halogen_HTML_Elements.div([  ])([ Halogen_HTML_Elements.i([ Halogen_HTML_Properties.class_("material-icons mdc-text-field__icon edit-icon"), Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(EditNote.create(v.value1)(v.value0))) ])([ Halogen_HTML_Core.text("edit") ]), Halogen_HTML_Elements.i([ Halogen_HTML_Properties.class_("material-icons mdc-text-field__icon edit-icon"), Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(DeleteNote.create(v.value0))) ])([ Halogen_HTML_Core.text("delete") ]) ]) ]);
+    return Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("mdc-card") ])([ Halogen_HTML_Elements.div_([ Halogen_HTML_Core.text(v.value1.title) ]), Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("note-content") ])([ Halogen_HTML_Core.text(v.value1.content) ]), Halogen_HTML_Elements.div([  ])([ Halogen_HTML_Elements.i([ Halogen_HTML_Properties.class_("material-icons mdc-text-field__icon edit-icon"), Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(EditNote.create(v.value1)(v.value0))) ])([ Halogen_HTML_Core.text("edit") ]), Halogen_HTML_Elements.i([ Halogen_HTML_Properties.class_("material-icons mdc-text-field__icon edit-icon"), Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(Delete.create(v.value0))) ])([ Halogen_HTML_Core.text("delete") ]) ]) ]);
 };
 var renderEntries = function (toHtml) {
     return function (f) {
@@ -64241,8 +64262,15 @@ var renderEntries = function (toHtml) {
         };
     };
 };
+var renderEditActions = Halogen_HTML_Elements.div_([ Halogen_HTML_Elements.button([ Halogen_HTML_Properties.class_("mdc-button mdc-button--outlined"), Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(SaveEntry.create)) ])([ Halogen_HTML_Core.text("Save") ]), Halogen_HTML_Elements.button([ Halogen_HTML_Properties.class_("mdc-button"), Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(CancelEdit.create)) ])([ Halogen_HTML_Core.text("Cancel") ]) ]);
+var renderDeleteNoteConfirmation = function (v) {
+    return Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("mdc-card") ])([ Halogen_HTML_Elements.div_([ Halogen_HTML_Core.text("Are you sure you want to delete note: " + v.value1.title) ]), Halogen_HTML_Elements.div([  ])([ Halogen_HTML_Elements.button([ Halogen_HTML_Properties.class_("mdc-button mdc-button--outlined"), Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(ConfirmedNoteDelete.create(v.value0))) ])([ Halogen_HTML_Core.text("Delete") ]), Halogen_HTML_Elements.button([ Halogen_HTML_Properties.class_("mdc-button"), Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(CancelDelete.create)) ])([ Halogen_HTML_Core.text("Cancel") ]) ]) ]);
+};
+var renderDeleteCredentialConfirmation = function (v) {
+    return Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("mdc-card") ])([ Halogen_HTML_Elements.div_([ Halogen_HTML_Core.text("Are you sure you want to delete credential: " + v.value1.id) ]), Halogen_HTML_Elements.div([  ])([ Halogen_HTML_Elements.button([ Halogen_HTML_Properties.class_("mdc-button mdc-button--outlined"), Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(ConfirmedCredentialDelete.create(v.value0))) ])([ Halogen_HTML_Core.text("Delete") ]), Halogen_HTML_Elements.button([ Halogen_HTML_Properties.class_("mdc-button"), Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(CancelDelete.create)) ])([ Halogen_HTML_Core.text("Cancel") ]) ]) ]);
+};
 var renderCredential = function (v) {
-    return Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("mdc-card") ])([ Halogen_HTML_Elements.div_([ Halogen_HTML_Core.text(v.value1.id) ]), Halogen_HTML_Elements.div_([ Halogen_HTML_Core.text(v.value1.username) ]), Halogen_HTML_Elements.div_([ Halogen_HTML_Core.text(v.value1.password) ]), Halogen_HTML_Elements.button([ Halogen_HTML_Properties.class_("test-selector"), Halogen_HTML_Properties.attr("data-copy-text")(v.value1.password) ])([ Halogen_HTML_Core.text("Copy") ]), Halogen_HTML_Elements.div([  ])([ Halogen_HTML_Elements.i([ Halogen_HTML_Properties.class_("material-icons mdc-text-field__icon edit-icon"), Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(EditCredential.create(v.value1)(v.value0))) ])([ Halogen_HTML_Core.text("edit") ]), Halogen_HTML_Elements.i([ Halogen_HTML_Properties.class_("material-icons mdc-text-field__icon edit-icon"), Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(DeleteCredential.create(v.value0))) ])([ Halogen_HTML_Core.text("delete") ]) ]) ]);
+    return Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("mdc-card") ])([ Halogen_HTML_Elements.div_([ Halogen_HTML_Core.text(v.value1.id) ]), Halogen_HTML_Elements.div_([ Halogen_HTML_Core.text(v.value1.username) ]), Halogen_HTML_Elements.div_([ Halogen_HTML_Core.text(v.value1.password) ]), Halogen_HTML_Elements.button([ Halogen_HTML_Properties.class_("test-selector"), Halogen_HTML_Properties.attr("data-copy-text")(v.value1.password) ])([ Halogen_HTML_Core.text("Copy") ]), Halogen_HTML_Elements.div([  ])([ Halogen_HTML_Elements.i([ Halogen_HTML_Properties.class_("material-icons mdc-text-field__icon edit-icon"), Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(EditCredential.create(v.value1)(v.value0))) ])([ Halogen_HTML_Core.text("edit") ]), Halogen_HTML_Elements.i([ Halogen_HTML_Properties.class_("material-icons mdc-text-field__icon edit-icon"), Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(Delete.create(v.value0))) ])([ Halogen_HTML_Core.text("delete") ]) ]) ]);
 };
 var noteFilter = function (filter) {
     return function (v) {
@@ -64254,7 +64282,8 @@ var initialState = function (vault) {
         vault: vault,
         vaultView: Credentials.value,
         maybeOpenedEntry: Data_Maybe.Nothing.value,
-        maybeFilter: Data_Maybe.Nothing.value
+        maybeFilter: Data_Maybe.Nothing.value,
+        maybeDelete: Data_Maybe.Nothing.value
     };
 };
 var eqVaultView = new Data_Eq.Eq(function (x) {
@@ -64271,8 +64300,8 @@ var eqVaultView = new Data_Eq.Eq(function (x) {
 var tabClass = function (tab) {
     return function (currentView) {
         return "mdc-tab" + (function () {
-            var $55 = Data_Eq.eq(eqVaultView)(tab)(currentView);
-            if ($55) {
+            var $70 = Data_Eq.eq(eqVaultView)(tab)(currentView);
+            if ($70) {
                 return " mdc-tab--active";
             };
             return "";
@@ -64299,13 +64328,59 @@ var credentialFilter = function (filter) {
 var renderVaultList = function (v) {
     return function (v1) {
         return function (maybeFilter) {
-            if (v1 instanceof Credentials) {
-                return renderEntries(renderCredential)(Data_Maybe.maybe(Data_Function["const"](true))(credentialFilter)(maybeFilter))(v.credentials);
+            return function (maybeDelete) {
+                return function (maybeOpenedEntry) {
+                    if (v1 instanceof Credentials) {
+                        var renderEntity = function (v2) {
+                            if (maybeDelete instanceof Data_Maybe.Just) {
+                                var $84 = maybeDelete.value0 === v2.value0;
+                                if ($84) {
+                                    return renderDeleteCredentialConfirmation(v2);
+                                };
+                                return renderCredential(v2);
+                            };
+                            if (maybeDelete instanceof Data_Maybe.Nothing) {
+                                if (maybeOpenedEntry instanceof Data_Maybe.Just) {
+                                    if (maybeOpenedEntry.value0.position instanceof Data_Maybe.Just) {
+                                        var $88 = maybeOpenedEntry.value0.position.value0 === v2.value0;
+                                        if ($88) {
+                                            return Halogen_HTML_Elements.div_([ Halogen_HTML.slot(EditEntrySlot.value)(EditEntryComponent.ui(maybeOpenedEntry.value0.entry))(maybeOpenedEntry.value0.entry)(Data_Void.absurd), renderEditActions ]);
+                                        };
+                                        return renderCredential(v2);
+                                    };
+                                    if (maybeOpenedEntry.value0.position instanceof Data_Maybe.Nothing) {
+                                        return renderCredential(v2);
+                                    };
+                                    throw new Error("Failed pattern match at VaultComponent line 216, column 29 - line 224, column 40: " + [ maybeOpenedEntry.value0.position.constructor.name ]);
+                                };
+                                if (maybeOpenedEntry instanceof Data_Maybe.Nothing) {
+                                    return renderCredential(v2);
+                                };
+                                throw new Error("Failed pattern match at VaultComponent line 215, column 18 - line 225, column 38: " + [ maybeOpenedEntry.constructor.name ]);
+                            };
+                            throw new Error("Failed pattern match at VaultComponent line 213, column 34 - line 225, column 38: " + [ maybeDelete.constructor.name ]);
+                        };
+                        return renderEntries(renderEntity)(Data_Maybe.maybe(Data_Function["const"](true))(credentialFilter)(maybeFilter))(v.credentials);
+                    };
+                    if (v1 instanceof Notes) {
+                        var renderEntity = function (v2) {
+                            if (maybeDelete instanceof Data_Maybe.Just) {
+                                var $95 = maybeDelete.value0 === v2.value0;
+                                if ($95) {
+                                    return renderDeleteNoteConfirmation(v2);
+                                };
+                                return renderNote(v2);
+                            };
+                            if (maybeDelete instanceof Data_Maybe.Nothing) {
+                                return renderNote(v2);
+                            };
+                            throw new Error("Failed pattern match at VaultComponent line 228, column 34 - line 230, column 30: " + [ maybeDelete.constructor.name ]);
+                        };
+                        return renderEntries(renderEntity)(Data_Maybe.maybe(Data_Function["const"](true))(noteFilter)(maybeFilter))(v.notes);
+                    };
+                    throw new Error("Failed pattern match at VaultComponent line 210, column 1 - line 210, column 153: " + [ v.constructor.name, v1.constructor.name, maybeFilter.constructor.name, maybeDelete.constructor.name, maybeOpenedEntry.constructor.name ]);
+                };
             };
-            if (v1 instanceof Notes) {
-                return renderEntries(renderNote)(Data_Maybe.maybe(Data_Function["const"](true))(noteFilter)(maybeFilter))(v.notes);
-            };
-            throw new Error("Failed pattern match at VaultComponent line 168, column 1 - line 168, column 127: " + [ v.constructor.name, v1.constructor.name, maybeFilter.constructor.name ]);
         };
     };
 };
@@ -64317,24 +64392,34 @@ var renderVault = function (st) {
         if (st.maybeOpenedEntry instanceof Data_Maybe.Just) {
             return Halogen_HTML_Elements.div_([  ]);
         };
-        throw new Error("Failed pattern match at VaultComponent line 143, column 7 - line 148, column 29: " + [ st.maybeOpenedEntry.constructor.name ]);
+        throw new Error("Failed pattern match at VaultComponent line 178, column 7 - line 183, column 29: " + [ st.maybeOpenedEntry.constructor.name ]);
     })(), (function () {
         if (st.maybeOpenedEntry instanceof Data_Maybe.Nothing) {
             return Halogen_HTML_Elements.div_([  ]);
         };
         if (st.maybeOpenedEntry instanceof Data_Maybe.Just) {
+            var $102 = Data_Maybe.isJust(st.maybeOpenedEntry.value0.position);
+            if ($102) {
+                return Halogen_HTML_Elements.div_([  ]);
+            };
             return Halogen_HTML.slot(EditEntrySlot.value)(EditEntryComponent.ui(st.maybeOpenedEntry.value0.entry))(st.maybeOpenedEntry.value0.entry)(Data_Void.absurd);
         };
-        throw new Error("Failed pattern match at VaultComponent line 149, column 7 - line 151, column 118: " + [ st.maybeOpenedEntry.constructor.name ]);
+        throw new Error("Failed pattern match at VaultComponent line 184, column 7 - line 189, column 107: " + [ st.maybeOpenedEntry.constructor.name ]);
     })(), (function () {
         if (st.maybeOpenedEntry instanceof Data_Maybe.Just) {
-            return Halogen_HTML_Elements.div_([ Halogen_HTML_Elements.button([ Halogen_HTML_Properties.class_("mdc-button mdc-button--outlined"), Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(SaveEntry.create)) ])([ Halogen_HTML_Core.text("Save") ]), Halogen_HTML_Elements.button([ Halogen_HTML_Properties.class_("mdc-button"), Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(CancelEdit.create)) ])([ Halogen_HTML_Core.text("Cancel") ]) ]);
+            if (st.maybeOpenedEntry.value0.position instanceof Data_Maybe.Just) {
+                return Halogen_HTML_Elements.div_([  ]);
+            };
+            if (st.maybeOpenedEntry.value0.position instanceof Data_Maybe.Nothing) {
+                return renderEditActions;
+            };
+            throw new Error("Failed pattern match at VaultComponent line 191, column 29 - line 193, column 39: " + [ st.maybeOpenedEntry.value0.position.constructor.name ]);
         };
         if (st.maybeOpenedEntry instanceof Data_Maybe.Nothing) {
             return Halogen_HTML_Elements.div_([  ]);
         };
-        throw new Error("Failed pattern match at VaultComponent line 152, column 7 - line 163, column 30: " + [ st.maybeOpenedEntry.constructor.name ]);
-    })(), renderVaultList(st.vault)(st.vaultView)(st.maybeFilter) ]);
+        throw new Error("Failed pattern match at VaultComponent line 190, column 7 - line 194, column 30: " + [ st.maybeOpenedEntry.constructor.name ]);
+    })(), renderVaultList(st.vault)(st.vaultView)(st.maybeFilter)(st.maybeDelete)(st.maybeOpenedEntry) ]);
 };
 var render = function (st) {
     return Halogen_HTML_Elements.div_([ renderVault(st) ]);
@@ -64344,14 +64429,14 @@ var addOrUpdateEntry = function (v) {
         return function (v2) {
             if (v instanceof Vault.CredentialEntry && v1 instanceof Data_Maybe.Nothing) {
                 return Vault.Vault((function () {
-                    var $74 = {};
-                    for (var $75 in v2) {
-                        if ({}.hasOwnProperty.call(v2, $75)) {
-                            $74[$75] = v2[$75];
+                    var $111 = {};
+                    for (var $112 in v2) {
+                        if ({}.hasOwnProperty.call(v2, $112)) {
+                            $111[$112] = v2[$112];
                         };
                     };
-                    $74.credentials = Data_Semigroup.append(Data_Semigroup.semigroupArray)([ v.value0 ])(v2.credentials);
-                    return $74;
+                    $111.credentials = Data_Semigroup.append(Data_Semigroup.semigroupArray)([ v.value0 ])(v2.credentials);
+                    return $111;
                 })());
             };
             if (v instanceof Vault.CredentialEntry && v1 instanceof Data_Maybe.Just) {
@@ -64363,29 +64448,29 @@ var addOrUpdateEntry = function (v) {
                     if (v3 instanceof Data_Maybe.Nothing) {
                         return v2.credentials;
                     };
-                    throw new Error("Failed pattern match at VaultComponent line 179, column 19 - line 181, column 35: " + [ v3.constructor.name ]);
+                    throw new Error("Failed pattern match at VaultComponent line 239, column 19 - line 241, column 35: " + [ v3.constructor.name ]);
                 })();
                 return Vault.Vault((function () {
-                    var $80 = {};
-                    for (var $81 in v2) {
-                        if ({}.hasOwnProperty.call(v2, $81)) {
-                            $80[$81] = v2[$81];
+                    var $117 = {};
+                    for (var $118 in v2) {
+                        if ({}.hasOwnProperty.call(v2, $118)) {
+                            $117[$118] = v2[$118];
                         };
                     };
-                    $80.credentials = credentials;
-                    return $80;
+                    $117.credentials = credentials;
+                    return $117;
                 })());
             };
             if (v instanceof Vault.NoteEntry && v1 instanceof Data_Maybe.Nothing) {
                 return Vault.Vault((function () {
-                    var $85 = {};
-                    for (var $86 in v2) {
-                        if ({}.hasOwnProperty.call(v2, $86)) {
-                            $85[$86] = v2[$86];
+                    var $122 = {};
+                    for (var $123 in v2) {
+                        if ({}.hasOwnProperty.call(v2, $123)) {
+                            $122[$123] = v2[$123];
                         };
                     };
-                    $85.notes = Data_Semigroup.append(Data_Semigroup.semigroupArray)([ v.value0 ])(v2.notes);
-                    return $85;
+                    $122.notes = Data_Semigroup.append(Data_Semigroup.semigroupArray)([ v.value0 ])(v2.notes);
+                    return $122;
                 })());
             };
             if (v instanceof Vault.NoteEntry && v1 instanceof Data_Maybe.Just) {
@@ -64397,20 +64482,20 @@ var addOrUpdateEntry = function (v) {
                     if (v3 instanceof Data_Maybe.Nothing) {
                         return v2.notes;
                     };
-                    throw new Error("Failed pattern match at VaultComponent line 185, column 13 - line 187, column 29: " + [ v3.constructor.name ]);
+                    throw new Error("Failed pattern match at VaultComponent line 245, column 13 - line 247, column 29: " + [ v3.constructor.name ]);
                 })();
                 return Vault.Vault((function () {
-                    var $91 = {};
-                    for (var $92 in v2) {
-                        if ({}.hasOwnProperty.call(v2, $92)) {
-                            $91[$92] = v2[$92];
+                    var $128 = {};
+                    for (var $129 in v2) {
+                        if ({}.hasOwnProperty.call(v2, $129)) {
+                            $128[$129] = v2[$129];
                         };
                     };
-                    $91.notes = notes;
-                    return $91;
+                    $128.notes = notes;
+                    return $128;
                 })());
             };
-            throw new Error("Failed pattern match at VaultComponent line 175, column 1 - line 175, column 62: " + [ v.constructor.name, v1.constructor.name, v2.constructor.name ]);
+            throw new Error("Failed pattern match at VaultComponent line 235, column 1 - line 235, column 62: " + [ v.constructor.name, v1.constructor.name, v2.constructor.name ]);
         };
     };
 };
@@ -64422,35 +64507,36 @@ var $$eval = function (query) {
     };
     if (query instanceof SearchFilter) {
         return Control_Bind.discard(Control_Bind.discardUnit)(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.modify(Halogen_Query_HalogenM.monadStateHalogenM)(function (v) {
-            var $99 = {};
-            for (var $100 in v) {
-                if ({}.hasOwnProperty.call(v, $100)) {
-                    $99[$100] = v[$100];
+            var $136 = {};
+            for (var $137 in v) {
+                if ({}.hasOwnProperty.call(v, $137)) {
+                    $136[$137] = v[$137];
                 };
             };
-            $99.maybeFilter = (function () {
-                var $98 = query.value0 !== "";
-                if ($98) {
+            $136.maybeFilter = (function () {
+                var $135 = query.value0 !== "";
+                if ($135) {
                     return new Data_Maybe.Just(query.value0);
                 };
                 return Data_Maybe.Nothing.value;
             })();
-            return $99;
+            return $136;
         }))(function () {
             return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(query.value1);
         });
     };
     if (query instanceof SwitchTab) {
         return Control_Bind.discard(Control_Bind.discardUnit)(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.modify(Halogen_Query_HalogenM.monadStateHalogenM)(function (v) {
-            var $104 = {};
-            for (var $105 in v) {
-                if ({}.hasOwnProperty.call(v, $105)) {
-                    $104[$105] = v[$105];
+            var $141 = {};
+            for (var $142 in v) {
+                if ({}.hasOwnProperty.call(v, $142)) {
+                    $141[$142] = v[$142];
                 };
             };
-            $104.vaultView = query.value0;
-            $104.maybeOpenedEntry = Data_Maybe.Nothing.value;
-            return $104;
+            $141.vaultView = query.value0;
+            $141.maybeOpenedEntry = Data_Maybe.Nothing.value;
+            $141.maybeDelete = Data_Maybe.Nothing.value;
+            return $141;
         }))(function () {
             return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(query.value1);
         });
@@ -64461,13 +64547,13 @@ var $$eval = function (query) {
         }))(function (v) {
             if (v instanceof Credentials) {
                 return Control_Bind.discard(Control_Bind.discardUnit)(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.modify(Halogen_Query_HalogenM.monadStateHalogenM)(function (v1) {
-                    var $111 = {};
-                    for (var $112 in v1) {
-                        if ({}.hasOwnProperty.call(v1, $112)) {
-                            $111[$112] = v1[$112];
+                    var $148 = {};
+                    for (var $149 in v1) {
+                        if ({}.hasOwnProperty.call(v1, $149)) {
+                            $148[$149] = v1[$149];
                         };
                     };
-                    $111.maybeOpenedEntry = new Data_Maybe.Just({
+                    $148.maybeOpenedEntry = new Data_Maybe.Just({
                         entry: Vault.CredentialEntry.create({
                             id: "",
                             username: "",
@@ -64475,32 +64561,32 @@ var $$eval = function (query) {
                         }),
                         position: Data_Maybe.Nothing.value
                     });
-                    return $111;
+                    return $148;
                 }))(function () {
                     return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(query.value0);
                 });
             };
             if (v instanceof Notes) {
                 return Control_Bind.discard(Control_Bind.discardUnit)(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.modify(Halogen_Query_HalogenM.monadStateHalogenM)(function (v1) {
-                    var $114 = {};
-                    for (var $115 in v1) {
-                        if ({}.hasOwnProperty.call(v1, $115)) {
-                            $114[$115] = v1[$115];
+                    var $151 = {};
+                    for (var $152 in v1) {
+                        if ({}.hasOwnProperty.call(v1, $152)) {
+                            $151[$152] = v1[$152];
                         };
                     };
-                    $114.maybeOpenedEntry = new Data_Maybe.Just({
+                    $151.maybeOpenedEntry = new Data_Maybe.Just({
                         entry: Vault.NoteEntry.create({
                             title: "",
                             content: ""
                         }),
                         position: Data_Maybe.Nothing.value
                     });
-                    return $114;
+                    return $151;
                 }))(function () {
                     return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(query.value0);
                 });
             };
-            throw new Error("Failed pattern match at VaultComponent line 225, column 5 - line 244, column 18: " + [ v.constructor.name ]);
+            throw new Error("Failed pattern match at VaultComponent line 286, column 5 - line 305, column 18: " + [ v.constructor.name ]);
         });
     };
     if (query instanceof SaveEntry) {
@@ -64511,15 +64597,15 @@ var $$eval = function (query) {
                         return v2.position;
                     }))(v1.vault);
                     return Control_Bind.discard(Control_Bind.discardUnit)(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.modify(Halogen_Query_HalogenM.monadStateHalogenM)(function (v2) {
-                        var $121 = {};
-                        for (var $122 in v2) {
-                            if ({}.hasOwnProperty.call(v2, $122)) {
-                                $121[$122] = v2[$122];
+                        var $158 = {};
+                        for (var $159 in v2) {
+                            if ({}.hasOwnProperty.call(v2, $159)) {
+                                $158[$159] = v2[$159];
                             };
                         };
-                        $121.vault = vault;
-                        $121.maybeOpenedEntry = Data_Maybe.Nothing.value;
-                        return $121;
+                        $158.vault = vault;
+                        $158.maybeOpenedEntry = Data_Maybe.Nothing.value;
+                        return $158;
                     }))(function () {
                         return Control_Bind.discard(Control_Bind.discardUnit)(Halogen_Query_HalogenM.bindHalogenM)(Halogen_Query_HalogenM.raise(new Updated(vault)))(function () {
                             return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(query.value0);
@@ -64530,61 +64616,93 @@ var $$eval = function (query) {
             if (v instanceof Data_Maybe.Nothing) {
                 return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(query.value0);
             };
-            throw new Error("Failed pattern match at VaultComponent line 247, column 5 - line 255, column 18: " + [ v.constructor.name ]);
+            throw new Error("Failed pattern match at VaultComponent line 308, column 5 - line 316, column 18: " + [ v.constructor.name ]);
         });
     };
     if (query instanceof CancelEdit) {
         return Control_Bind.discard(Control_Bind.discardUnit)(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.modify(Halogen_Query_HalogenM.monadStateHalogenM)(function (v) {
-            var $126 = {};
-            for (var $127 in v) {
-                if ({}.hasOwnProperty.call(v, $127)) {
-                    $126[$127] = v[$127];
+            var $163 = {};
+            for (var $164 in v) {
+                if ({}.hasOwnProperty.call(v, $164)) {
+                    $163[$164] = v[$164];
                 };
             };
-            $126.maybeOpenedEntry = Data_Maybe.Nothing.value;
-            return $126;
+            $163.maybeOpenedEntry = Data_Maybe.Nothing.value;
+            return $163;
         }))(function () {
             return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(query.value0);
         });
     };
     if (query instanceof EditCredential) {
         return Control_Bind.discard(Control_Bind.discardUnit)(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.modify(Halogen_Query_HalogenM.monadStateHalogenM)(function (v) {
-            var $130 = {};
-            for (var $131 in v) {
-                if ({}.hasOwnProperty.call(v, $131)) {
-                    $130[$131] = v[$131];
+            var $167 = {};
+            for (var $168 in v) {
+                if ({}.hasOwnProperty.call(v, $168)) {
+                    $167[$168] = v[$168];
                 };
             };
-            $130.maybeOpenedEntry = new Data_Maybe.Just({
+            $167.maybeOpenedEntry = new Data_Maybe.Just({
                 entry: new Vault.CredentialEntry(query.value0),
                 position: new Data_Maybe.Just(query.value1)
             });
-            return $130;
+            return $167;
         }))(function () {
             return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(query.value2);
         });
     };
-    if (query instanceof DeleteCredential) {
+    if (query instanceof EditNote) {
+        return Control_Bind.discard(Control_Bind.discardUnit)(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.modify(Halogen_Query_HalogenM.monadStateHalogenM)(function (v) {
+            var $173 = {};
+            for (var $174 in v) {
+                if ({}.hasOwnProperty.call(v, $174)) {
+                    $173[$174] = v[$174];
+                };
+            };
+            $173.maybeOpenedEntry = new Data_Maybe.Just({
+                entry: new Vault.NoteEntry(query.value0),
+                position: new Data_Maybe.Just(query.value1)
+            });
+            return $173;
+        }))(function () {
+            return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(query.value2);
+        });
+    };
+    if (query instanceof Delete) {
+        return Control_Bind.discard(Control_Bind.discardUnit)(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.modify(Halogen_Query_HalogenM.monadStateHalogenM)(function (v) {
+            var $179 = {};
+            for (var $180 in v) {
+                if ({}.hasOwnProperty.call(v, $180)) {
+                    $179[$180] = v[$180];
+                };
+            };
+            $179.maybeDelete = new Data_Maybe.Just(query.value0);
+            return $179;
+        }))(function () {
+            return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(query.value1);
+        });
+    };
+    if (query instanceof ConfirmedCredentialDelete) {
         return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.get(Halogen_Query_HalogenM.monadStateHalogenM))(function (v) {
             var updatedVault = Vault.Vault((function () {
-                var $138 = {};
-                for (var $139 in v.vault) {
-                    if ({}.hasOwnProperty.call(v.vault, $139)) {
-                        $138[$139] = v["vault"][$139];
+                var $186 = {};
+                for (var $187 in v.vault) {
+                    if ({}.hasOwnProperty.call(v.vault, $187)) {
+                        $186[$187] = v["vault"][$187];
                     };
                 };
-                $138.credentials = Data_Maybe.fromMaybe(v.vault.credentials)(Data_Array.deleteAt(query.value0)(v.vault.credentials));
-                return $138;
+                $186.credentials = Data_Maybe.fromMaybe(v.vault.credentials)(Data_Array.deleteAt(query.value0)(v.vault.credentials));
+                return $186;
             })());
             return Control_Bind.discard(Control_Bind.discardUnit)(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.modify(Halogen_Query_HalogenM.monadStateHalogenM)(function (v1) {
-                var $141 = {};
-                for (var $142 in v1) {
-                    if ({}.hasOwnProperty.call(v1, $142)) {
-                        $141[$142] = v1[$142];
+                var $189 = {};
+                for (var $190 in v1) {
+                    if ({}.hasOwnProperty.call(v1, $190)) {
+                        $189[$190] = v1[$190];
                     };
                 };
-                $141.vault = updatedVault;
-                return $141;
+                $189.vault = updatedVault;
+                $189.maybeDelete = Data_Maybe.Nothing.value;
+                return $189;
             }))(function () {
                 return Control_Bind.discard(Control_Bind.discardUnit)(Halogen_Query_HalogenM.bindHalogenM)(Halogen_Query_HalogenM.raise(new Updated(updatedVault)))(function () {
                     return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(query.value1);
@@ -64592,27 +64710,50 @@ var $$eval = function (query) {
             });
         });
     };
-    if (query instanceof EditNote) {
-        return Control_Bind.discard(Control_Bind.discardUnit)(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.modify(Halogen_Query_HalogenM.monadStateHalogenM)(function (v) {
-            var $146 = {};
-            for (var $147 in v) {
-                if ({}.hasOwnProperty.call(v, $147)) {
-                    $146[$147] = v[$147];
+    if (query instanceof ConfirmedNoteDelete) {
+        return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.get(Halogen_Query_HalogenM.monadStateHalogenM))(function (v) {
+            var updatedVault = Vault.Vault((function () {
+                var $196 = {};
+                for (var $197 in v.vault) {
+                    if ({}.hasOwnProperty.call(v.vault, $197)) {
+                        $196[$197] = v["vault"][$197];
+                    };
                 };
-            };
-            $146.maybeOpenedEntry = new Data_Maybe.Just({
-                entry: new Vault.NoteEntry(query.value0),
-                position: new Data_Maybe.Just(query.value1)
+                $196.notes = Data_Maybe.fromMaybe(v.vault.notes)(Data_Array.deleteAt(query.value0)(v.vault.notes));
+                return $196;
+            })());
+            return Control_Bind.discard(Control_Bind.discardUnit)(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.modify(Halogen_Query_HalogenM.monadStateHalogenM)(function (v1) {
+                var $199 = {};
+                for (var $200 in v1) {
+                    if ({}.hasOwnProperty.call(v1, $200)) {
+                        $199[$200] = v1[$200];
+                    };
+                };
+                $199.vault = updatedVault;
+                $199.maybeDelete = Data_Maybe.Nothing.value;
+                return $199;
+            }))(function () {
+                return Control_Bind.discard(Control_Bind.discardUnit)(Halogen_Query_HalogenM.bindHalogenM)(Halogen_Query_HalogenM.raise(new Updated(updatedVault)))(function () {
+                    return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(query.value1);
+                });
             });
-            return $146;
-        }))(function () {
-            return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(query.value2);
         });
     };
-    if (query instanceof DeleteNote) {
-        return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(query.value1);
+    if (query instanceof CancelDelete) {
+        return Control_Bind.discard(Control_Bind.discardUnit)(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.modify(Halogen_Query_HalogenM.monadStateHalogenM)(function (v) {
+            var $204 = {};
+            for (var $205 in v) {
+                if ({}.hasOwnProperty.call(v, $205)) {
+                    $204[$205] = v[$205];
+                };
+            };
+            $204.maybeDelete = Data_Maybe.Nothing.value;
+            return $204;
+        }))(function () {
+            return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(query.value0);
+        });
     };
-    throw new Error("Failed pattern match at VaultComponent line 213, column 14 - line 279, column 14: " + [ query.constructor.name ]);
+    throw new Error("Failed pattern match at VaultComponent line 274, column 14 - line 351, column 14: " + [ query.constructor.name ]);
 };
 var ui = function (vault) {
     return Halogen_Component.lifecycleParentComponent(ordEditEntrySlot)({
@@ -64633,9 +64774,11 @@ module.exports = {
     SaveEntry: SaveEntry,
     CancelEdit: CancelEdit,
     EditCredential: EditCredential,
-    DeleteCredential: DeleteCredential,
     EditNote: EditNote,
-    DeleteNote: DeleteNote,
+    ConfirmedNoteDelete: ConfirmedNoteDelete,
+    Delete: Delete,
+    ConfirmedCredentialDelete: ConfirmedCredentialDelete,
+    CancelDelete: CancelDelete,
     ui: ui,
     eqVaultView: eqVaultView
 };

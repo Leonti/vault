@@ -3,11 +3,21 @@
     {
       "notes": [
         {
-          "content": "content",
-          "title": "title"
+          "content": "Some new content",
+          "title": "some new note"
         }
       ],
       "credentials": [
+        {
+          "password": "z7B;V}s7r/61h&x>6JOl",
+          "username": "new",
+          "id": "adding"
+        },
+        {
+          "password": "(;vI$BTzWaSzk`<j8Tph",
+          "username": "sds",
+          "id": "new id"
+        },
         {
           "password": "password",
           "username": "username",
