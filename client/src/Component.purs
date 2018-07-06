@@ -90,6 +90,7 @@ render st =
     , HH.p_
         [ HH.text (if st.loading then "Working..." else "") ]
     , renderError st.error
+    , HH.a [ HP.href "download" ] [HH.text "Download"]
     ]
 
 initialState :: State

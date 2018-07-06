@@ -14,7 +14,7 @@ import DOM.Node.Types (Element)
 import Data.Array (filter, length, range, zip, updateAt, deleteAt)
 import Data.Maybe (Maybe(..), fromMaybe, isJust, maybe)
 import Data.Newtype (over)
-import Data.String (contains, Pattern(..))
+import Data.String (contains, Pattern(..), toLower)
 import Data.Tuple (Tuple(..))
 import EditEntryComponent as EditEntryComponent
 import Halogen as H
@@ -99,14 +99,14 @@ renderDeleteCredentialConfirmation (Tuple i (Credential credential)) =
     ]
 
 credentialFilter :: String -> Credential -> Boolean
-credentialFilter filter (Credential c) = contains pattern c.id || contains pattern c.username || contains pattern c.password
+credentialFilter filter (Credential c) = contains pattern (toLower c.id) || contains pattern (toLower c.username) || contains pattern (toLower c.password)
   where
-    pattern = (Pattern filter)
+    pattern = (Pattern $ toLower filter)
 
 noteFilter :: String -> Note -> Boolean
-noteFilter filter (Note n) = contains pattern n.title || contains pattern n.content
+noteFilter filter (Note n) = contains pattern (toLower n.title) || contains pattern (toLower n.content)
   where
-    pattern = (Pattern filter)
+    pattern = (Pattern $ toLower filter)
 
 type VaultComponentHTML eff = H.ParentHTML Query EditEntryComponent.Query ChildSlot eff
 
