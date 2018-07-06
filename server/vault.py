@@ -1,6 +1,6 @@
 from flask import Flask, Response, request, send_from_directory, send_file
 import StringIO
-from flask.ext.httpauth import HTTPBasicAuth
+from flask_httpauth import HTTPBasicAuth
 from SimpleAES import SimpleAES
 import simples3
 import hashlib, binascii
@@ -36,22 +36,18 @@ def send_js(path):
 def send_css(path):
     return send_from_directory('static/css', path)
 
-@app.route('/tpl/<path:path>')
-def send_tpl(path):
-    return send_from_directory('static/tpl', path)
-
 def get_s3_bucket():
     return simples3.S3Bucket(
                 app.config['S3_BUCKET'],
-                access_key=app.config['S3_ACCESS_KEY'], 
-                secret_key=app.config['S3_SECRET_KEY'], 
+                access_key=app.config['S3_ACCESS_KEY'],
+                secret_key=app.config['S3_SECRET_KEY'],
                 base_url='https://s3-' + app.config['S3_REGION'] + '.amazonaws.com/' + app.config['S3_BUCKET'])
 
 def read_data(master_password):
     aes = SimpleAES(master_password)
     try:
         encrypted = get_s3_bucket().get(app.config['DB_FILE']).read()
-        decrypted = aes.decrypt(encrypted)  
+        decrypted = aes.decrypt(encrypted)
         return decrypted
     except:
         return json.dumps({'credentials': [], 'notes': []})

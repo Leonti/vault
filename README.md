@@ -10,7 +10,7 @@ Your data is stored in AES-256 encrypted file in your private S3 bucket.
 Web application written in Python uses a password you provide over *https* connection to decrypt the data and present it to you in the browser window.  
 
 ####What you need
-* A server to run the web application. Docker support is not mandatory but it makes the whole thing a lot easier 
+* A server to run the web application. Docker support is not mandatory but it makes the whole thing a lot easier
 * Amazon S3 bucket to store files
 * A domain name and a certificate for it. I use cheap-ass domain validated certificate. Self-signed one would also work.
 
@@ -29,11 +29,11 @@ Build docker image:
 `sudo docker build -t leonti/vault .`  
 
 Generate configuration file:  
-`sudo docker run -v /data:/data -e SETTINGS=/data/settings.cfg -t -i leonti/vault python generate_config.py`  
+`sudo docker run -v /data:/data -e SETTINGS=/data/settings.cfg -t -i leonti/vault python /config/generate_config.py`  
 You will have to provide your S3 config and your master password.  
 
 Run the whole thing:  
-`sudo docker run -v /data:/data -e SETTINGS=/data/settings.cfg --name vault leonti/vault python vault.py`  
+`sudo docker run -v /data:/data -e SETTINGS=/data/settings.cfg --name vault leonti/vault`  
 
 After that you have to run a docker nginx instance with domain and ssl configuration, and link `vault` container to it.  
 

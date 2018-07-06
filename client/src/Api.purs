@@ -17,7 +17,7 @@ import Vault (Vault)
 getVault :: forall eff1. String -> Aff (ajax :: AX.AJAX | eff1) (Either String Vault)
 getVault password = do
   res <- attempt $ AX.affjax $ AX.defaultRequest
-    { url = "http://localhost:3000/db/1"
+    { url = "/db"
     , headers = [RequestHeader "Authorization" ("Basic " <> (encode $ "vault:" <> password)) ]
     }
   let decode r = decodeJson r.response :: Either String Vault
@@ -28,7 +28,7 @@ saveVault :: forall eff1. Vault -> String -> Aff (ajax :: AX.AJAX | eff1) (Eithe
 saveVault vault password = do
   res <- attempt $ AX.affjax $ AX.defaultRequest
     { method = Left PUT
-    , url = "http://localhost:3000/db/1"
+    , url = "/db"
     , content = Just $ encodeJson vault
     , headers = [RequestHeader "Authorization" ("Basic " <> (encode $ "vault:" <> password)) ]
     }

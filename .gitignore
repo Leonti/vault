@@ -1,2 +1,4 @@
 settings.cfg
 client/bower_components
+test_run.sh
+.psc-ide-port
