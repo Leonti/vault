@@ -79,7 +79,7 @@ renderLoginPage loginState =
               , renderError error
             ]
         ]
-      , HH.div [ HP.class_ (HH.ClassName "mdc-layout-grid__cell mdc-layout-grid__cell--align-bottom") ]
+      , HH.div [ HP.class_ (HH.ClassName "mdc-layout-grid__cell mdc-layout-grid__cell--span-12 mdc-layout-grid__cell--align-bottom") ]
         [ HH.a [ HP.class_ (HH.ClassName ""), HP.href "download" ]
             [ HH.i [ HP.class_ (HH.ClassName "material-icons mdc-text-field__icon edit-icon") ]
               [ HH.text "vertical_align_bottom" ]
