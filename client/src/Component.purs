@@ -105,7 +105,7 @@ eval query = case query of
     H.put $ LoginPage (EnteringPassword password)
     pure next
   OnKeyboard e next -> do
-    let code = KE.code e
+    let code = KE.key e
     case code of
       "Enter" -> loadVault next
       _ -> pure next

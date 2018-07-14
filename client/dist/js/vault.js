@@ -14439,7 +14439,7 @@ var $$eval = function (query) {
         });
     };
     if (query instanceof OnKeyboard) {
-        var code = DOM_Event_KeyboardEvent.code(query.value0);
+        var code = DOM_Event_KeyboardEvent.key(query.value0);
         if (code === "Enter") {
             return loadVault(query.value1);
         };
