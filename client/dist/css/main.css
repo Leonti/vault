@@ -1,9 +1,70 @@
+html, body {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+}
+
+.login-loading {
+  text-align: center;
+}
+
+.login-grid {
+  height: 100%;
+}
+
+.login-grid-inner {
+  height: 100%;
+}
+
 .note-content {
   white-space: pre;
+}
+
+.entry-card__primary,
+.edit-entry-card__primary {
+  padding: 1rem;
+}
+
+.add-button-wrapper {
+  position: relative;
+}
+
+.add-button {
+  position: absolute;
+  right: 1rem;
+  top: -0.5rem;
+}
+
+.edit-entry-card__primary {
+
+}
+
+.note-content.mdc-text-field--textarea {
+  margin-top: 1rem;
+  border-color: rgba(0,0,0,.12);
+  min-height: 20rem;
+}
+
+.note-content.mdc-text-field--textarea textarea {
+  padding: 0.5rem;
+}
+
+.entry-card__primary .mdc-typography--headline6 {
+  margin-top: 0;
 }
 
 i.generate-password.material-icons.mdc-text-field__icon,
 i.edit-icon.material-icons.mdc-text-field__icon {
   pointer-events: inherit;
   cursor: pointer;
+}
+
+.overlay {
+  background: #ccc;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  opacity: 0.5;
 }

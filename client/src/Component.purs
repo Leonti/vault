@@ -1,4 +1,4 @@
-module Component (State, VaultView, OpenedView, Query(..), ui) where
+module Component (State, Page(..), LoginState(..), VaultView, Query(..), ui) where
 
 import Prelude
 
@@ -16,7 +16,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Network.HTTP.Affjax as AX
-import Vault (Vault, Credential, Note)
+import Vault (Vault)
 import VaultComponent as VaultComponent
 
 data VaultView = Credentials | Notes
@@ -27,14 +27,11 @@ type OpenedEntry a =
     position :: Maybe Int
   }
 
-data OpenedView = OpenedCredential (OpenedEntry Credential) | OpenedNote (OpenedEntry Note)
+data LoginState = EnteringPassword String | Loading | FailedLogin String
 
-type State =
-  { loading :: Boolean
-  , password :: String
-  , error :: Maybe String
-  , vault :: Maybe Vault
-  }
+data Page = LoginPage LoginState | VaultPage String Vault VaultComponent.VaultSave
+
+type State = Page
 
 data Slot = VaultSlot
 derive instance eqVaultSlot :: Eq Slot
@@ -43,63 +40,61 @@ derive instance ordVaultSlot :: Ord Slot
 data Query a
   = HandleVault (VaultComponent.Message) a
   | SetPassword String a
-  | MakeRequest a
   | OnKeyboard KeyboardEvent a
 
-renderLogin :: forall eff. String -> Boolean ->  H.ParentHTML Query VaultComponent.Query Slot eff
-renderLogin password isLoading =
-  HH.div_ $
-    [ HH.div
-        [ HP.class_ (HH.ClassName "mdc-text-field") ]
-        [ HH.input
-          [ HP.value password
-          , HP.type_ InputPassword
-          , HP.autocomplete false
-          , HP.placeholder "Master password"
-          , HE.onValueInput (HE.input SetPassword)
-          , HE.onKeyUp (HE.input OnKeyboard)
-          , HP.class_ (HH.ClassName "mdc-text-field__input")
-          ]
+type MainComponentHTML eff = H.ParentHTML Query VaultComponent.Query Slot eff
+
+renderLogin :: forall eff. String -> MainComponentHTML eff
+renderLogin password =
+  HH.div_ [ HH.div
+            [ HP.class_ (HH.ClassName "mdc-text-field mdc-text-field--fullwidth") ]
+            [ HH.input
+              [ HP.value password
+              , HP.type_ InputPassword
+              , HP.autocomplete false
+              , HP.placeholder "Master password"
+              , HE.onValueInput (HE.input SetPassword)
+              , HE.onKeyUp (HE.input OnKeyboard)
+              , HP.class_ (HH.ClassName "mdc-text-field__input")
+              ]
+            ]
         ]
-    , HH.button
-        [ HP.class_ (HH.ClassName "mdc-button mdc-button--outlined")
-        , HP.disabled isLoading
-        , HE.onClick (HE.input_ MakeRequest)
+
+renderError :: forall eff. String -> MainComponentHTML eff
+renderError msg =
+  HH.div [ HP.class_ (HH.ClassName "mdc-snackbar mdc-snackbar--active") ]
+    [ HH.div [ HP.class_ (HH.ClassName "mdc-snackbar__text") ] [ HH.text msg ] ]
+
+renderLoginPage :: forall eff. LoginState -> MainComponentHTML eff
+renderLoginPage loginState =
+  HH.div [ HP.class_ (HH.ClassName "mdc-layout-grid login-grid") ]
+    [ HH.div [ HP.class_ (HH.ClassName "mdc-layout-grid__inner login-grid-inner") ]
+      [ HH.div [ HP.class_ (HH.ClassName "mdc-layout-grid__cell mdc-layout-grid__cell--span-4") ] []
+      , HH.div [ HP.class_ (HH.ClassName "mdc-layout-grid__cell mdc-layout-grid__cell--align-middle") ]
+        [ case loginState of
+            EnteringPassword password -> HH.div_ [ renderLogin password ]
+            Loading -> HH.h4 [HP.class_ $ HH.ClassName "login-loading mdc-typography--headline4"] [ HH.text "Loading..." ]
+            FailedLogin error -> HH.div_ [
+              renderLogin ""
+              , renderError error
+            ]
         ]
-        [ HH.text "Login" ]
+      , HH.div [ HP.class_ (HH.ClassName "mdc-layout-grid__cell mdc-layout-grid__cell--align-bottom") ]
+        [ HH.a [ HP.class_ (HH.ClassName ""), HP.href "download" ]
+            [ HH.i [ HP.class_ (HH.ClassName "material-icons mdc-text-field__icon edit-icon") ]
+              [ HH.text "vertical_align_bottom" ]
+            ]
+        ]
+      ]
     ]
 
-renderError :: forall eff. Maybe String -> H.ParentHTML Query VaultComponent.Query Slot eff
-renderError maybeError =
-  HH.div_
-      case maybeError of
-        Nothing -> []
-        Just e ->
-          [ HH.h2_
-              [ HH.text "Error:" ]
-          , HH.pre_
-              [ HH.code_ [ HH.text e ] ]
-          ]
-
-render :: forall eff. State -> H.ParentHTML Query VaultComponent.Query Slot (Aff (random :: RANDOM, dom :: DOM | eff))
-render st =
-  HH.div_ $
-    [ case st.vault of
-        Nothing -> renderLogin st.password st.loading
-        Just vault -> HH.slot VaultSlot (VaultComponent.ui vault) unit (HE.input HandleVault)
-    , HH.p_
-        [ HH.text (if st.loading then "Working..." else "") ]
-    , renderError st.error
-    , HH.a [ HP.href "download" ] [HH.text "Download"]
-    ]
+render :: forall eff. State -> MainComponentHTML (Aff (random :: RANDOM, dom :: DOM | eff))
+render st = case st of
+  LoginPage loginState -> renderLoginPage loginState
+  VaultPage _ vault vaultSave -> HH.slot VaultSlot (VaultComponent.ui vault) vaultSave (HE.input HandleVault)
 
 initialState :: State
-initialState =
-  { loading: false
-  , password: ""
-  , error: Nothing
-  , vault: Nothing
-  }
+initialState = LoginPage $ EnteringPassword ""
 
 eval :: forall eff a. Query a -> H.ParentDSL State Query VaultComponent.Query Slot Void (Aff (ajax :: AX.AJAX | eff)) a
 eval query = case query of
@@ -107,9 +102,8 @@ eval query = case query of
     _ <- updateVault vault next
     pure next
   SetPassword password next -> do
-    H.modify (_ { password = password, vault = Nothing })
+    H.put $ LoginPage (EnteringPassword password)
     pure next
-  MakeRequest next -> loadVault next
   OnKeyboard e next -> do
     let code = KE.code e
     case code of
@@ -118,23 +112,30 @@ eval query = case query of
 
 loadVault :: forall eff a. a -> H.ParentDSL State Query VaultComponent.Query Slot Void (Aff (ajax :: AX.AJAX | eff)) a
 loadVault next = do
-  password <- H.gets _.password
-  H.modify (_ { loading = true })
-  vaultEither <- H.liftAff $ getVault password
-  case vaultEither of
-    Right vault -> H.modify (_ { loading = false, vault = Just vault })
-    Left e -> H.modify (_ { loading = false, error = Just e })
-  pure next
+  state <- H.get
+  case state of
+    LoginPage (EnteringPassword password) -> do
+      H.put $ LoginPage Loading
+      vaultEither <- H.liftAff $ getVault password
+      case vaultEither of
+        Right vault -> H.put $ VaultPage password vault VaultComponent.Saved
+        Left e -> H.put $ LoginPage (FailedLogin e)
+      pure next
+    _ -> pure next
 
 updateVault :: forall eff a. Vault -> a -> H.ParentDSL State Query VaultComponent.Query Slot Void (Aff (ajax :: AX.AJAX | eff)) a
 updateVault vault next = do
-  password <- H.gets _.password
-  H.modify (_ { loading = true })
-  responseEither <- H.liftAff $ saveVault vault password
-  case responseEither of
-    Right response -> H.modify (_ { loading = false })
-    Left e -> H.modify (_ { loading = false, error = Just e })
-  pure next
+  state <- H.get
+  case state of
+    VaultPage password _ _ -> do
+      H.put $ VaultPage password vault VaultComponent.Saving
+      responseEither <- H.liftAff $ saveVault vault password
+      case responseEither of
+        Right response -> H.put $ VaultPage password vault VaultComponent.Saved
+        Left e ->  H.put $ VaultPage password vault (VaultComponent.SaveError e)
+      pure next
+    _ -> pure next
+
 
 ui :: forall eff. H.Component HH.HTML Query Unit Void (Aff (ajax :: AX.AJAX, random :: RANDOM, dom :: DOM | eff))
 ui =

@@ -29,15 +29,6 @@ data Query a
   | SetNoteContent String a
   | GetVaultEntry (VaultEntry -> a)
 
-{-
-<div class="mdc-text-field mdc-text-field--fullwidth">
-  <input class="mdc-text-field__input"
-         type="text"
-         placeholder="Full-Width Text Field"
-         aria-label="Full-Width Text Field">
-</div>
--}
-
 renderEditCredentialForm :: Credential -> H.ComponentHTML Query
 renderEditCredentialForm (Credential credential) =
   HH.div_ $
@@ -91,7 +82,7 @@ renderEditNoteForm (Note note) =
                 ]
         ]
     , HH.div
-        [ HP.class_ (HH.ClassName "mdc-text-field mdc-text-field--fullwidth mdc-text-field--textarea")]
+        [ HP.class_ (HH.ClassName "mdc-text-field mdc-text-field--fullwidth mdc-text-field--textarea note-content")]
         [ HH.textarea
           [ HP.value note.content
           , HP.id_ "content"
@@ -102,22 +93,11 @@ renderEditNoteForm (Note note) =
         ]
     ]
 
-{-
-<div class="mdc-text-field mdc-text-field--textarea">
-  <textarea id="textarea" class="mdc-text-field__input" rows="8" cols="40"></textarea>
-  <label for="textarea" class="mdc-floating-label">Textarea Label</label>
-</div>
--}
-
-
-
 render :: State -> H.ComponentHTML Query
 render st =
-  HH.div_ $
-    [ case st.entry of
-        CredentialEntry c -> renderEditCredentialForm c
-        NoteEntry n -> renderEditNoteForm n
-    ]
+  case st.entry of
+    CredentialEntry c -> renderEditCredentialForm c
+    NoteEntry n -> renderEditNoteForm n
 
 initialState :: VaultEntry -> State
 initialState entry =
